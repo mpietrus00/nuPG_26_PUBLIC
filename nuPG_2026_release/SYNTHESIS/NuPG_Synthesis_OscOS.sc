@@ -271,10 +271,12 @@ NuPG_Synthesis_OscOS {
 				stepTrigger = Trig1.ar(phaseTrig, SampleDur.ir);
 
 				// Get slope for sub-sample offset calculation (inlined rampToSlope)
-				stepSlope = phaseDelta.wrap(-0.5, 0.5);
+				// Ensure minimum positive slope to prevent division issues
+				stepSlope = phaseDelta.wrap(-0.5, 0.5).abs.max(SampleDur.ir);
 
 				// Calculate sub-sample offset for precise grain timing (inlined getSubSampleOffset)
-				sampleCount = stepPhase - (stepSlope < 0) / max(0.0001, stepSlope);
+				// Use abs slope and handle phase wrap compensation separately
+				sampleCount = (stepPhase - (phaseDelta < 0)) / stepSlope;
 				subSampleOffset = Latch.ar(sampleCount, stepTrigger);
 
 				// Apply probability and burst masking to trigger BEFORE accumulator
@@ -429,16 +431,18 @@ NuPG_Synthesis_OscOS {
 
 				// Calculate max overlap: limited by ratio of grain freq to trigger freq
 				// maxOverlap = min(userOverlap, grainSlope / stepSlope)
-				maxOverlap_One = min(overlap_One, grainSlope_One / max(0.0001, stepSlope));
-				maxOverlap_Two = min(overlap_Two, grainSlope_Two / max(0.0001, stepSlope));
-				maxOverlap_Three = min(overlap_Three, grainSlope_Three / max(0.0001, stepSlope));
+				// stepSlope is already guaranteed positive and >= SampleDur.ir from above
+				maxOverlap_One = min(overlap_One, grainSlope_One / stepSlope).clip(0.001, 100);
+				maxOverlap_Two = min(overlap_Two, grainSlope_Two / stepSlope).clip(0.001, 100);
+				maxOverlap_Three = min(overlap_Three, grainSlope_Three / stepSlope).clip(0.001, 100);
 
 				// Window (envelope) slope: how fast envelope progresses
 				// Latch values at trigger for consistent grain duration
 				// Use group-specific triggers for proper offset timing
-				windowSlope_One = Latch.ar(grainSlope_One, stepTrigger_One) / max(0.001, Latch.ar(maxOverlap_One, stepTrigger_One));
-				windowSlope_Two = Latch.ar(grainSlope_Two, stepTrigger_Two) / max(0.001, Latch.ar(maxOverlap_Two, stepTrigger_Two));
-				windowSlope_Three = Latch.ar(grainSlope_Three, stepTrigger_Three) / max(0.001, Latch.ar(maxOverlap_Three, stepTrigger_Three));
+				// maxOverlap is already clipped 0.001-100 so division is safe
+				windowSlope_One = Latch.ar(grainSlope_One, stepTrigger_One) / Latch.ar(maxOverlap_One, stepTrigger_One).max(0.001);
+				windowSlope_Two = Latch.ar(grainSlope_Two, stepTrigger_Two) / Latch.ar(maxOverlap_Two, stepTrigger_Two).max(0.001);
+				windowSlope_Three = Latch.ar(grainSlope_Three, stepTrigger_Three) / Latch.ar(maxOverlap_Three, stepTrigger_Three).max(0.001);
 
 				// Window phase: envelope position (0->1 over grain duration)
 				// clip(0,1) makes it one-shot (stays at end after grain completes)
@@ -571,17 +575,18 @@ NuPG_Synthesis_OscOS {
 
 				// Pulsaret: use OscOS for anti-aliased wavetable oscillation
 				// OscOS.ar(buffer, phase, numSubTables, subTablePos, oversample, mul)
-				// numSubTables=1 (single 2048-sample wavetable), subTablePos=0, oversample=1
-				pulsaret_One = OscOS.ar(pulsaret_buffer, grainPhase_One, 1, 0, 1);
-				pulsaret_Two = OscOS.ar(pulsaret_buffer, grainPhase_Two, 1, 0, 1);
-				pulsaret_Three = OscOS.ar(pulsaret_buffer, grainPhase_Three, 1, 0, 1);
+				// numSubTables=1 (single 2048-sample wavetable), subTablePos=0
+				// Use oversample parameter (default 4) for anti-aliasing quality
+				pulsaret_One = OscOS.ar(pulsaret_buffer, grainPhase_One, 1, 0, oversample);
+				pulsaret_Two = OscOS.ar(pulsaret_buffer, grainPhase_Two, 1, 0, oversample);
+				pulsaret_Three = OscOS.ar(pulsaret_buffer, grainPhase_Three, 1, 0, oversample);
 
 				// Envelope: use OscOS for anti-aliased one-shot reading
 				// windowPhase is clipped 0-1 (one-shot), so it reads through buffer once
-				// OscOS.ar(buffer, phase, numSubTables=1, subTablePos=0, oversample=1)
-				envelope_One = OscOS.ar(envelope_buffer, windowPhase_One, 1, 0, 1);
-				envelope_Two = OscOS.ar(envelope_buffer, windowPhase_Two, 1, 0, 1);
-				envelope_Three = OscOS.ar(envelope_buffer, windowPhase_Three, 1, 0, 1);
+				// Use oversample parameter for consistency
+				envelope_One = OscOS.ar(envelope_buffer, windowPhase_One, 1, 0, oversample);
+				envelope_Two = OscOS.ar(envelope_buffer, windowPhase_Two, 1, 0, oversample);
+				envelope_Three = OscOS.ar(envelope_buffer, windowPhase_Three, 1, 0, oversample);
 
 				// ============================================================
 				// OUTPUT MIX
@@ -603,6 +608,9 @@ NuPG_Synthesis_OscOS {
 				pulsar_3 = pulsar_3 * amplitude_Three * amplitude_local_Three;
 
 				mix = Mix.new([pulsar_1, pulsar_2, pulsar_3]) * globalAmplitude;
+
+				// Sanitize output: replace NaN/inf with 0 to prevent audio artifacts
+				mix = Select.ar(CheckBadValues.ar(mix, post: 0), [mix, DC.ar(0), DC.ar(0), DC.ar(0)]);
 
 				LeakDC.ar(mix).softclip
 			});
