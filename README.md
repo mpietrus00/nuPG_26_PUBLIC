@@ -163,9 +163,9 @@ nuPG_25/
 - Place in your Extensions folder and recompile
 
 **GUI elements missing or misaligned**
-- Check that all class files compiled without errors
+- Check that all class files are compiled without errors
 - Look for error messages in the post window during boot
 
 ## License
 
-See LICENSE file for details.
+While GitHub Copilot was employed during development, its use was limited to searching existing codebases and navigating documentation. All code was written manually by the author 
