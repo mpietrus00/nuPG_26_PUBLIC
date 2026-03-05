@@ -302,9 +302,9 @@ NuPG_Data {
 			[1.0, 20000.0],   // formant 1 (absolute Hz)
 			[1.0, 20000.0],   // formant 2 (absolute Hz)
 			[1.0, 20000.0],   // formant 3 (absolute Hz)
-			[0.1, 5.0],      // envMult 1
-			[0.1, 5.0],      // envMult 2
-			[0.1, 5.0],      // envMult 3
+			[0.1, 4.99],      // envMult 1
+			[0.1, 4.99],      // envMult 2
+			[0.1, 4.99],      // envMult 3
 			[-1.0, 1.0],    // pan 1
 			[-1.0, 1.0],    // pan 2
 			[-1.0, 1.0],    // pan 3
