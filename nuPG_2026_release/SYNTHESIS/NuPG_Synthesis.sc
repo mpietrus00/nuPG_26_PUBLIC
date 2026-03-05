@@ -118,14 +118,10 @@ NuPG_Synthesis {
 					trig * Select.ar(maskOn, [DC.ar(1), mask]);
 				};
 
-				var chanMask = { |trig, reset, channelMask, centerMask, numSpeakers = 2|
-					var arrayOfPositions = (0..numSpeakers - 1) / (numSpeakers - 1);
-					var channelPos = arrayOfPositions.collect { |pos|
-						Dser([pos], channelMask)
-					};
-					var demand = Dseq(channelPos ++ Dser([0.5], centerMask), inf);
-					var mask = Demand.ar(trig + reset, reset, demand);
-					mask.linlin(0, 1, -1 / numSpeakers, (2 * numSpeakers - 3) / numSpeakers);
+				var chanMask = { |trig, reset, channelMask, centerMask|
+					var demand = Dseq([Dser([-1], channelMask),
+						Dser([1], channelMask), Dser([0], centerMask)], inf);
+					Demand.ar(trig + reset, reset, demand);
 				};
 
 				var fluxAmt, fluxRate, flux;
