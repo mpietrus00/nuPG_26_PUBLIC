@@ -1,4 +1,3 @@
-
 NuPG_ModulatorSet {
 
 	*ar {
@@ -218,7 +217,7 @@ NuPG_Synthesis {
 					var panMod, pan, pan_loop;
 
 					var formantFreq, grainRateMod, grainRate, grainDur, grains;
-					var fmRatio, fmAmt, modMul, modAdd;
+					var fmRatio, fmAmt;
 					var compensationGain;
 
 					// Get group on/off state
@@ -312,12 +311,10 @@ NuPG_Synthesis {
 
 					fmAmt = \fmAmt.kr(0) * \fmAmt_loop.kr(1);
 					fmRatio = \fmRatio.kr(0) * \fmRatio_loop.kr(1);
-					modMul  = \modMul.kr(1);
-					modAdd  = \modAdd.kr(1);
 
 					grainRateMod = Select.kr(\modulationMode.kr(0), [
-						Latch.ar(LFSaw.ar(formantFreq * fmRatio, 0, fmAmt/modMul, fmAmt/modAdd), trigger),
-						Latch.ar(LFSaw.ar(formantFreq - fmAmt * fmRatio, 0, fmAmt/modMul, fmAmt/modAdd) - fmAmt, trigger)
+						Latch.ar(LFSaw.ar(formantFreq * fmRatio, 0, fmAmt, fmAmt), trigger),
+						Latch.ar(LFSaw.ar(formantFreq - fmAmt * fmRatio, 0, fmAmt, fmAmt) - fmAmt, trigger)
 					]);
 
 					grainRate = formantFreq * BufFrames.kr(pulsaret_buffer) * SampleDur.ir;
@@ -337,8 +334,7 @@ NuPG_Synthesis {
 						interp: 4,
 						pan: pan + channelMask,
 						envbufnum: envelope_buffer,
-						maxGrains: 2048,
-						mul: 0.9
+						maxGrains: 2048
 					);
 
 					compensationGain = 1.0 / sqrt(max(1.0, overlap));

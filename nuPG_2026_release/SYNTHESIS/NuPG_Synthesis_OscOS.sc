@@ -292,7 +292,7 @@ NuPG_Synthesis_OscOS {
 					grains = grains.sum;
 
 					compensationGain = 1.0 / sqrt(max(1.0, overlap));
-					grains = grains * compensationGain * 0.9;
+					grains = grains * compensationGain;
 
 					grains * amp;
 				};
