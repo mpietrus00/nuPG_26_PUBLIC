@@ -302,9 +302,9 @@ NuPG_Data {
 			[1.0, 20000.0],   // formant 1 (absolute Hz)
 			[1.0, 20000.0],   // formant 2 (absolute Hz)
 			[1.0, 20000.0],   // formant 3 (absolute Hz)
-			[0.0, 2],       // envMult 1
-			[0.0, 2],       // envMult 2
-			[0.01, 2],      // envMult 3
+			[0.1, 5.0],      // envMult 1
+			[0.1, 5.0],      // envMult 2
+			[0.1, 5.0],      // envMult 3
 			[-1.0, 1.0],    // pan 1
 			[-1.0, 1.0],    // pan 2
 			[-1.0, 1.0],    // pan 3
@@ -312,7 +312,7 @@ NuPG_Data {
 			[0.0, 1.0],     // amp 2
 			[0.0, 1.0]      // amp 3
 		];
-		var warp = [\exp, \exp, \exp, \exp, \lin, \lin, \lin, \lin, \lin, \lin, \lin, \lin, \lin];
+		var warp = [\exp, \exp, \exp, \exp, \exp, \exp, \exp, \lin, \lin, \lin, \lin, \lin, \lin];
 
 		^13.collect { |i|
 			NuPG_Data.makeCV(defVal[i], ranges[i][0], ranges[i][1], 0.001, warp[i]);

@@ -295,15 +295,15 @@ NuPG_Application {
 		// Envelope multiplication tables
 		envelopeMult_One = NuPG_GUI_Table_View.new;
 		envelopeMult_One.defaultTablePath = tablesPath;
-		envelopeMult_One.draw("_envelopeDil_One", guiDefinitions.envelopeOneViewDimensions, n: numInstances);
+		envelopeMult_One.draw("_overlap_One", guiDefinitions.envelopeOneViewDimensions, n: numInstances);
 
 		envelopeMult_Two = NuPG_GUI_Table_View.new;
 		envelopeMult_Two.defaultTablePath = tablesPath;
-		envelopeMult_Two.draw("_envelopeDil_Two", guiDefinitions.envelopeTwoViewDimensions, n: numInstances);
+		envelopeMult_Two.draw("_overlap_Two", guiDefinitions.envelopeTwoViewDimensions, n: numInstances);
 
 		envelopeMult_Three = NuPG_GUI_Table_View.new;
 		envelopeMult_Three.defaultTablePath = tablesPath;
-		envelopeMult_Three.draw("_envelopeDil_Three", guiDefinitions.envelopeThreeViewDimensions, n: numInstances);
+		envelopeMult_Three.draw("_overlap_Three", guiDefinitions.envelopeThreeViewDimensions, n: numInstances);
 
 		// Pan tables
 		panOneTable = NuPG_GUI_Table_View.new;
