@@ -124,10 +124,9 @@ NuPG_Synthesis {
 					Demand.ar(trig + reset, reset, demand);
 				};
 
-				var fluxAmt, fluxRate, flux;
 				var modNames, modIndices, mods;
-				var tFreqMod, triggerFreq, trigger, channelMask;
-				var calcGrains, chains;
+				var tFreqMod, triggerFreq, trigger;
+				var channelMask, calcGrains, chains;
 
 				// Chain-specific parameter naming to match standard synthesis
 				var chainNumMap = IdentityDictionary[
@@ -135,14 +134,6 @@ NuPG_Synthesis {
 					\Two -> "2",
 					\Three -> "3"
 				];
-
-				// ============================================================
-				// FLUX
-				// ============================================================
-
-				fluxAmt = \allFluxAmt.kr(0) * \allFluxAmt_loop.kr(1);
-				fluxRate = \fluxRate.kr(40);
-				flux = { 2 ** (LFDNoise3.ar(fluxRate * (2 ** Rand(-1.0, 1.0))) * fluxAmt) };
 
 				// ============================================================
 				// MODULATION
@@ -171,7 +162,7 @@ NuPG_Synthesis {
 
 				// Calculate trigger frequency
 				triggerFreq = \fundamental_frequency.kr(5) * \fundamental_frequency_loop.kr(1);
-				triggerFreq = triggerFreq + (triggerFreq * tFreqMod) * flux.();
+				triggerFreq = triggerFreq * (1 + tFreqMod);
 				triggerFreq = triggerFreq.clip(0.1, 4000);
 
 				// Schedule events
@@ -264,7 +255,7 @@ NuPG_Synthesis {
 					formantFreq_loop = Select.kr(group_onOff, [1, formantFreq_loop]);
 
 					formantFreq = NamedControl.kr(("formant_frequency_" ++ chainID).asSymbol, 440) * formantFreq_loop;
-					formantFreq = formantFreq * max(0.01, 1 + formantMod) * flux.();
+					formantFreq = formantFreq * max(0.01, 1 + formantMod);
 
 					// ============================================================
 					// GRAIN DURATION CALCULATION
