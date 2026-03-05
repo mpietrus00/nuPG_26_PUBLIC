@@ -127,6 +127,7 @@ NuPG_Synthesis {
 				var tFreqMod, triggerFreq, trigger;
 				var channelMask, calcGrains, chains;
 
+				// TO DO: get rid of chainNumMap
 				// Chain-specific parameter naming to match standard synthesis
 				var chainNumMap = IdentityDictionary[
 					\One -> "1",
@@ -155,13 +156,13 @@ NuPG_Synthesis {
 
 				tFreqMod = modNames.collect{ |name, j|
 					Select.ar(NamedControl.kr(("fundamentalMod_" ++ name ++ "_active").asSymbol, 0), [
-						K2A.ar(0), (modIndices[j] * mods[j])
+						K2A.ar(0), modIndices[j] * mods[j]
 					])
 				}.sum;
 
 				// Calculate trigger frequency
 				triggerFreq = \fundamental_frequency.kr(5) * \fundamental_frequency_loop.kr(1);
-				triggerFreq = triggerFreq * (1 + tFreqMod);
+				triggerFreq = triggerFreq * (1 + tFreqMod); // TO DO: replace with 2 ** (mod * index)
 				triggerFreq = triggerFreq.clip(0.1, 4000);
 
 				// Schedule events
@@ -206,7 +207,7 @@ NuPG_Synthesis {
 
 				calcGrains = { |chainID|
 
-					var chainNum = chainNumMap[chainID];
+					var chainNum = chainNumMap[chainID]; // TO DO: get rid of chainNumMap
 
 					var group_onOff;
 
@@ -216,8 +217,8 @@ NuPG_Synthesis {
 					var ampMod, amp, amp_loop;
 					var panMod, pan, pan_loop;
 
-					var formantFreq, grainRateMod, grainRate, grainDur, grains;
-					var fmRatio, fmAmt;
+					var formantFreq, grainDur, grains;
+					var fmRatio, fmAmt, fmod;
 					var compensationGain;
 
 					// Get group on/off state
@@ -230,13 +231,15 @@ NuPG_Synthesis {
 					// Parameter names: offset_1_one_active, offset_1_two_active, etc.
 					offsetMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("offset_" ++ chainNum ++ "_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), (modIndices[j] * mods[j] * 0.01)
+							K2A.ar(0), modIndices[j] * mods[j] * 0.01 // TO DO: do scaling via specs
 						])
 					}.sum;
 
 					// Parameter name: offset_1, offset_2, offset_3
-					offset = (NamedControl.kr(("offset_" ++ chainNum).asSymbol, 0) + offsetMod).clip(0, 1);
-					trigger = DelayN.ar(trigger, 1, offset);
+					offset = NamedControl.kr(("offset_" ++ chainNum).asSymbol, 0);
+					offset = (offset + offsetMod).clip(0, 1);
+
+					trigger = DelayN.ar(events[\trigger], 1, offset);
 
 					// ============================================================
 					// FORMANT FREQUENCY CALCULATION
@@ -245,7 +248,7 @@ NuPG_Synthesis {
 					// Parameter names: formantOneMod_one_active, formantOneMod_two_active, etc.
 					formantMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("formant" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), (modIndices[j] * mods[j] * 0.1)
+							K2A.ar(0), modIndices[j] * mods[j] * 0.1 // TO DO: do scaling via specs
 						])
 					}.sum;
 
@@ -254,7 +257,7 @@ NuPG_Synthesis {
 					formantFreq_loop = Select.kr(group_onOff, [1, formantFreq_loop]);
 
 					formantFreq = NamedControl.kr(("formant_frequency_" ++ chainID).asSymbol, 440) * formantFreq_loop;
-					formantFreq = formantFreq * max(0.01, 1 + formantMod);
+					formantFreq = formantFreq * max(0.01, 1 + formantMod); // TO DO: replace with 2 ** (mod * index)
 
 					// ============================================================
 					// GRAIN DURATION CALCULATION
@@ -276,7 +279,7 @@ NuPG_Synthesis {
 					// Parameter names: ampOneMod_one_active, ampOneMod_two_active, etc.
 					ampMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("amp" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(1), ((1 + modIndices[j]) * mods[j].unipolar)
+							K2A.ar(1), (1 + modIndices[j]) * mods[j].unipolar // TO DO: do scaling via specs
 						])
 					}.product;
 
@@ -306,19 +309,22 @@ NuPG_Synthesis {
 					pan = (pan + panMod).fold(-1, 1);
 
 					// ============================================================
-					// RATE MODULATION
+					// FREQUENCY MODULATION
 					// ============================================================
 
+					// Calculate params for FM
 					fmAmt = \fmAmt.kr(0) * \fmAmt_loop.kr(1);
 					fmRatio = \fmRatio.kr(0) * \fmRatio_loop.kr(1);
 
-					grainRateMod = Select.kr(\modulationMode.kr(0), [
+					// TO DO: refactor of modulators
+					// Generate FM modulators
+					fmod = Select.kr(\modulationMode.kr(0), [
 						Latch.ar(LFSaw.ar(formantFreq * fmRatio, 0, fmAmt, fmAmt), trigger),
 						Latch.ar(LFSaw.ar(formantFreq - fmAmt * fmRatio, 0, fmAmt, fmAmt) - fmAmt, trigger)
 					]);
 
-					grainRate = formantFreq * BufFrames.kr(pulsaret_buffer) * SampleDur.ir;
-					grainRate = grainRate * (1 + grainRateMod);
+					// Apply frequency modulation
+					formantFreq = formantFreq + (formantFreq * fmod);
 
 					// ============================================================
 					// GENERATE GRAINS
@@ -329,7 +335,7 @@ NuPG_Synthesis {
 						trigger: trigger,
 						dur: grainDur,
 						sndbuf: pulsaret_buffer,
-						rate: grainRate,
+						rate: formantFreq * BufFrames.kr(pulsaret_buffer) * SampleDur.ir,
 						pos: 0,
 						interp: 4,
 						pan: pan + channelMask,

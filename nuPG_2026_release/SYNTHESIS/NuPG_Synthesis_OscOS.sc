@@ -6,7 +6,7 @@ NuPG_Synthesis_OscOS {
 
 		trainInstances = numInstances.collect{ |i|
 
-			Ndef((\nuPG_train_oscos_ ++ i).asSymbol, { |pulsaret_buffer, envelope_buffer|
+			Ndef((\nuPG_train_oscos_ ++ i).asSymbol, { |pulsaret_buffer, envelope_buffer, frequency_buffer|
 
 				// Helper functions for masking
 				var probMask = { |trig, prob = 1|
@@ -49,6 +49,7 @@ NuPG_Synthesis_OscOS {
 				var tFreqMod, triggerFreq, events;
 				var calcGrains, chains;
 
+				// TO DO: get rid of chainNumMap
 				// Chain-specific parameter naming to match standard synthesis
 				var chainNumMap = IdentityDictionary[
 					\One -> "1",
@@ -77,13 +78,13 @@ NuPG_Synthesis_OscOS {
 
 				tFreqMod = modNames.collect{ |name, j|
 					Select.ar(NamedControl.kr(("fundamentalMod_" ++ name ++ "_active").asSymbol, 0), [
-						K2A.ar(0), (modIndices[j] * mods[j])
+						K2A.ar(0), modIndices[j] * mods[j]
 					])
 				}.sum;
 
 				// Calculate trigger frequency
 				triggerFreq = \fundamental_frequency.kr(5) * \fundamental_frequency_loop.kr(1);
-				triggerFreq = triggerFreq * (1 + tFreqMod);
+				triggerFreq = triggerFreq * (1 + tFreqMod); // TO DO: replace with 2 ** (mod * index)
 				triggerFreq = triggerFreq.clip(0.1, 4000);
 
 				// Schedule sub-sample accurate events
@@ -120,7 +121,7 @@ NuPG_Synthesis_OscOS {
 
 				calcGrains = { |chainID|
 
-					var chainNum = chainNumMap[chainID];
+					var chainNum = chainNumMap[chainID]; // TO DO: get rid of chainNumMap
 
 					var group_onOff;
 
@@ -145,12 +146,14 @@ NuPG_Synthesis_OscOS {
 					// Parameter names: offset_1_one_active, offset_1_two_active, etc.
 					offsetMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("offset_" ++ chainNum ++ "_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), (modIndices[j] * mods[j] * 0.01)
+							K2A.ar(0), (modIndices[j] * mods[j] * 0.01) // TO DO: do scaling via specs
 						])
 					}.sum;
 
 					// Parameter name: offset_1, offset_2, offset_3
-					offset = (NamedControl.kr(("offset_" ++ chainNum).asSymbol, 0) + offsetMod).clip(0, 1);
+					offset = NamedControl.kr(("offset_" ++ chainNum).asSymbol, 0);
+					offset = (offset + offsetMod).clip(0, 1);
+
 					trigger = DelayN.ar(events[\trigger], 1, offset);
 
 					// ============================================================
@@ -178,7 +181,7 @@ NuPG_Synthesis_OscOS {
 					// Parameter names: formantOneMod_one_active, formantOneMod_two_active, etc.
 					formantMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("formant" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), (modIndices[j] * mods[j] * 0.1)
+							K2A.ar(0), modIndices[j] * mods[j] * 0.1 // TO DO: do scaling via specs
 						])
 					}.sum;
 
@@ -187,7 +190,7 @@ NuPG_Synthesis_OscOS {
 					formantFreq_loop = Select.kr(group_onOff, [1, formantFreq_loop]);
 
 					formantFreq = NamedControl.kr(("formant_frequency_" ++ chainID).asSymbol, 440) * formantFreq_loop;
-					formantFreq = formantFreq * max(0.01, 1 + formantMod);
+					formantFreq = formantFreq * max(0.01, 1 + formantMod); // TO DO: replace with 2 ** (mod * index)
 
 					// ============================================================
 					// AMPLITUDE CALCULATION
@@ -196,7 +199,7 @@ NuPG_Synthesis_OscOS {
 					// Parameter names: ampOneMod_one_active, ampOneMod_two_active, etc.
 					ampMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("amp" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(1), ((1 + modIndices[j]) * mods[j].unipolar)
+							K2A.ar(1), (1 + modIndices[j]) * mods[j].unipolar // TO DO: do scaling via specs
 						])
 					}.product;
 
@@ -214,7 +217,7 @@ NuPG_Synthesis_OscOS {
 					// Parameter names: panOneMod_one_active, panOneMod_two_active, etc.
 					panMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("pan" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), (modIndices[j] * mods[j])
+							K2A.ar(0), modIndices[j] * mods[j]
 						])
 					}.sum;
 
@@ -234,7 +237,7 @@ NuPG_Synthesis_OscOS {
 					fmRatio = \fmRatio.kr(0) * Latch.ar(\fmRatio_loop.ar(1), voices[\triggers]);
 
 					// Calculate mod frequency for FM
-					modFreq = windowRate * fmRatio;
+					modFreq = windowRate * fmRatio; // TO DO: add Select for windowRate / formantFreq
 
 					// Calculate mod phases for FM
 					modPhases = RampIntegrator.ar(
@@ -243,7 +246,17 @@ NuPG_Synthesis_OscOS {
 						subSampleOffset: events[\subSampleOffset]
 					);
 
+					// TO DO: replace SinOsc with SingleOscOS and add Select for fmods vs. Latch.ar(fmods, triggers)
+/*
 					// Generate FM modulators
+					fmods = SingleOscOS.ar(
+						bufnum: frequency_buffer,
+						phase: modPhases,
+						numCycles: 1,
+						cyclePos: 0,
+						oversample: 0
+					);
+*/
 					fmods = SinOsc.ar(DC.ar(0), modPhases * 2pi);
 					fmods = highpass.(fmods, modFreq);
 					fmods = fmods * fmAmt;
