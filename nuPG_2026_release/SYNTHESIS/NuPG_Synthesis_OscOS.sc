@@ -303,7 +303,7 @@ NuPG_Synthesis_OscOS {
 						phase: voices[\phases],
 						numCycles: 1,
 						cyclePos: 0,
-						oversample: 0,
+						oversample: 1,
 					);
 
 					grains = grainOscs * grainWindows;
