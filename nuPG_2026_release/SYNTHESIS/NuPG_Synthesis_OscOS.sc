@@ -246,8 +246,6 @@ NuPG_Synthesis_OscOS {
 						subSampleOffset: events[\subSampleOffset]
 					);
 
-					// TO DO: replace SinOsc with SingleOscOS and add Select for fmods vs. Latch.ar(fmods, triggers)
-/*
 					// Generate FM modulators
 					fmods = SingleOscOS.ar(
 						bufnum: frequency_buffer,
@@ -256,15 +254,14 @@ NuPG_Synthesis_OscOS {
 						cyclePos: 0,
 						oversample: 0
 					);
-*/
-					fmods = SinOsc.ar(DC.ar(0), modPhases * 2pi);
 
+					// Enable sample and hold for FM
 					fmods = Select.ar(\modulationMode.kr(0), [
 						fmods,
 						Latch.ar(fmods, voices[\triggers])
 					]);
 
-
+					// Apply tracking OnePole filter
 					fmods = highpass.(fmods, modFreq);
 					fmods = fmods * fmAmt;
 
@@ -291,7 +288,7 @@ NuPG_Synthesis_OscOS {
 						phase: voices[\phases],
 						numCycles: 1,
 						cyclePos: 0,
-						oversample: 1,
+						oversample: 0,
 					);
 
 					grains = grainOscs * grainWindows;
