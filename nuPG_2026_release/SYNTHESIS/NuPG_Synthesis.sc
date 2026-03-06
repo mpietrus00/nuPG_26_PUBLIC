@@ -239,7 +239,7 @@ NuPG_Synthesis {
 					offset = NamedControl.kr(("offset_" ++ chainNum).asSymbol, 0);
 					offset = (offset + offsetMod).clip(0, 1);
 
-					trigger = DelayN.ar(events[\trigger], 1, offset);
+					trigger = DelayN.ar(trigger, 1, offset);
 
 					// ============================================================
 					// FORMANT FREQUENCY CALCULATION
@@ -297,7 +297,7 @@ NuPG_Synthesis {
 					// Parameter names: panOneMod_one_active, panOneMod_two_active, etc.
 					panMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("pan" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), (modIndices[j] * mods[j])
+							K2A.ar(0), modIndices[j] * mods[j]
 						])
 					}.sum;
 

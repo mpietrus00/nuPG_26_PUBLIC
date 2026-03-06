@@ -146,7 +146,7 @@ NuPG_Synthesis_OscOS {
 					// Parameter names: offset_1_one_active, offset_1_two_active, etc.
 					offsetMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("offset_" ++ chainNum ++ "_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), (modIndices[j] * mods[j] * 0.01) // TO DO: do scaling via specs
+							K2A.ar(0), modIndices[j] * mods[j] * 0.01 // TO DO: do scaling via specs
 						])
 					}.sum;
 
