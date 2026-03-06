@@ -156,13 +156,13 @@ NuPG_Synthesis {
 
 				tFreqMod = modNames.collect{ |name, j|
 					Select.ar(NamedControl.kr(("fundamentalMod_" ++ name ++ "_active").asSymbol, 0), [
-						K2A.ar(0), modIndices[j] * mods[j]
+						K2A.ar(0), modIndices[j] * mods[j] // TODO: figure out specs and scaling
 					])
 				}.sum;
 
 				// Calculate trigger frequency
 				triggerFreq = \fundamental_frequency.kr(5) * \fundamental_frequency_loop.kr(1);
-				triggerFreq = triggerFreq * (1 + tFreqMod); // TO DO: replace with 2 ** (mod * index)
+				triggerFreq = triggerFreq + (triggerFreq * tFreqMod); // TO DO: replace with 2 ** (mod * index)
 				triggerFreq = triggerFreq.clip(0.1, 4000);
 
 				// Schedule events
@@ -212,13 +212,13 @@ NuPG_Synthesis {
 					var group_onOff;
 
 					var offsetMod, offset;
-					var overlap, overlap_loop;
-					var formantMod, formantFreq_loop;
+					var overlapMod overlap, overlap_loop;
+					var formantMod, formantFreq, formantFreq_loop;
 					var ampMod, amp, amp_loop;
 					var panMod, pan, pan_loop;
 
-					var formantFreq, grainDur, grains;
 					var fmRatio, fmAmt, modFreq, modPhase, fmod;
+					var grainDur, grains;
 					var compensationGain;
 
 					// Get group on/off state
@@ -231,7 +231,7 @@ NuPG_Synthesis {
 					// Parameter names: offset_1_one_active, offset_1_two_active, etc.
 					offsetMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("offset_" ++ chainNum ++ "_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), modIndices[j] * mods[j] * 0.01 // TO DO: do scaling via specs
+							K2A.ar(0), modIndices[j] * mods[j] * 0.01 // TODO: figure out specs and scaling
 						])
 					}.sum;
 
@@ -248,7 +248,7 @@ NuPG_Synthesis {
 					// Parameter names: formantOneMod_one_active, formantOneMod_two_active, etc.
 					formantMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("formant" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), modIndices[j] * mods[j] * 0.1 // TO DO: do scaling via specs
+							K2A.ar(0), modIndices[j] * mods[j] * 0.1 // TODO: figure out specs and scaling
 						])
 					}.sum;
 
@@ -257,20 +257,25 @@ NuPG_Synthesis {
 					formantFreq_loop = Select.kr(group_onOff, [1, formantFreq_loop]);
 
 					formantFreq = NamedControl.kr(("formant_frequency_" ++ chainID).asSymbol, 440) * formantFreq_loop;
-					formantFreq = formantFreq * max(0.01, 1 + formantMod); // TO DO: replace with 2 ** (mod * index)
+					formantFreq = (formantFreq + (formantFreq * formantMod)).clip(1, 20000); // TO DO: replace with 2 ** (mod * index)
 
 					// ============================================================
-					// GRAIN DURATION CALCULATION
+					// OVERLAP CALCULATION
 					// ============================================================
+
+					// Parameter names: envMulOneMod_one_active, envMulOneMod_two_active, etc.
+					overlapMod = modNames.collect{ |name, j|
+						Select.ar(NamedControl.kr(("envMul" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
+							K2A.ar(0), modIndices[j] * mods[j] * 0.1 // TODO: figure out specs and scaling
+						])
+					}.sum;
 
 					// Parameter names: envMul_One_loop, envMul_One
 					overlap_loop = NamedControl.kr(("envMul_" ++ chainID ++ "_loop").asSymbol, 1);
 					overlap_loop = Select.kr(group_onOff, [1, overlap_loop]);
 
 					overlap = NamedControl.kr(("envMul_" ++ chainID).asSymbol, 1) * overlap_loop;
-
-					grainDur = overlap / max(0.001, triggerFreq);
-					//grainDur = overlap / max(0.001, formantFreq);
+					overlap = (overlap + overlapMod).clip(0.1, 4.99);
 
 					// ============================================================
 					// AMPLITUDE CALCULATION
@@ -279,7 +284,7 @@ NuPG_Synthesis {
 					// Parameter names: ampOneMod_one_active, ampOneMod_two_active, etc.
 					ampMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("amp" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(1), (1 + modIndices[j]) * mods[j].unipolar // TO DO: do scaling via specs
+							K2A.ar(1), (1 + modIndices[j]) * mods[j].unipolar // TODO: figure out specs and scaling
 						])
 					}.product;
 
@@ -297,7 +302,7 @@ NuPG_Synthesis {
 					// Parameter names: panOneMod_one_active, panOneMod_two_active, etc.
 					panMod = modNames.collect{ |name, j|
 						Select.ar(NamedControl.kr(("pan" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), modIndices[j] * mods[j]
+							K2A.ar(0), modIndices[j] * mods[j] // TODO: figure out specs and scaling
 						])
 					}.sum;
 
@@ -313,8 +318,8 @@ NuPG_Synthesis {
 					// ============================================================
 
 					// Calculate params for FM
-					fmAmt = \fmAmt.kr(0) * Latch.ar(\fmAmt_loop.ar(1), trigger);
-					fmRatio = \fmRatio.kr(0) * Latch.ar(\fmRatio_loop.ar(1), trigger);
+					fmAmt = \fmAmt.kr(0) * \fmAmt_loop.kr(1);
+					fmRatio = \fmRatio.kr(0) * \fmRatio_loop.kr(1);
 
 					// Calculate mod frequency for FM
 					modFreq = formantFreq * fmRatio;
@@ -331,15 +336,15 @@ NuPG_Synthesis {
 						oversample: 0
 					);
 
-					// Apply sample and hold for FM
-					fmod = Latch.ar(fmod, trigger);
-
 					// Apply frequency modulation
 					formantFreq = formantFreq + (formantFreq * fmod * fmAmt);
 
 					// ============================================================
 					// GENERATE GRAINS
 					// ============================================================
+
+					grainDur = overlap / max(0.001, triggerFreq);
+					//grainDur = overlap / max(0.001, formantFreq);
 
 					grains = GrainBuf.ar(
 						numChannels: 2,
