@@ -175,6 +175,19 @@ NuPG_Synthesis_OscOS {
 					overlap = (overlap + overlapMod).clip(0.1, 4.99);
 
 					// ============================================================
+					// VOICE ALLOCATION
+					// ============================================================
+
+					windowRate = events[\rate] / max(0.001, overlap);
+
+					voices = VoiceAllocator.ar(
+						numChannels: grainChannels,
+						trig: trigger,
+						rate: windowRate,
+						subSampleOffset: events[\subSampleOffset],
+					);
+
+					// ============================================================
 					// FORMANT FREQUENCY CALCULATION
 					// ============================================================
 
@@ -191,6 +204,8 @@ NuPG_Synthesis_OscOS {
 
 					formantFreq = NamedControl.kr(("formant_frequency_" ++ chainID).asSymbol, 440) * formantFreq_loop;
 					formantFreq = (formantFreq + (formantFreq * formantMod)).clip(1, 20000); // TO DO: replace with 2 ** (mod * index)
+
+					formantFreq = Latch.ar(formantFreq, voices[\triggers]);
 
 					// ============================================================
 					// AMPLITUDE CALCULATION
@@ -210,6 +225,8 @@ NuPG_Synthesis_OscOS {
 					amp = NamedControl.kr(("amplitude_" ++ chainID).asSymbol, 1) * amp_loop;
 					amp = (amp * ampMod).clip(0, 1);
 
+					amp = Latch.ar(amp, voices[\triggers]);
+
 					// ============================================================
 					// PANNING CALCULATION
 					// ============================================================
@@ -228,18 +245,7 @@ NuPG_Synthesis_OscOS {
 					pan = NamedControl.kr(("pan_" ++ chainID).asSymbol, 0) + pan_loop;
 					pan = (pan + panMod).fold(-1, 1);
 
-					// ============================================================
-					// VOICE ALLOCATION
-					// ============================================================
-
-					windowRate = events[\rate] / max(0.001, overlap);
-
-					voices = VoiceAllocator.ar(
-						numChannels: grainChannels,
-						trig: trigger,
-						rate: windowRate,
-						subSampleOffset: events[\subSampleOffset],
-					);
+					pan = Latch.ar(pan, voices[\triggers]);
 
 					// ============================================================
 					// FREQUENCY MODULATION
