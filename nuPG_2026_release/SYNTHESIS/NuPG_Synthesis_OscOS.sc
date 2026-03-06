@@ -258,6 +258,13 @@ NuPG_Synthesis_OscOS {
 					);
 */
 					fmods = SinOsc.ar(DC.ar(0), modPhases * 2pi);
+
+					fmods = Select.ar(\modulationMode.kr(0), [
+						fmods,
+						Latch.ar(fmods, voices[\triggers])
+					]);
+
+
 					fmods = highpass.(fmods, modFreq);
 					fmods = fmods * fmAmt;
 

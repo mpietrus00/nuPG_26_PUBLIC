@@ -455,10 +455,6 @@ NuPG_Application {
 		modulators = NuPG_GUI_Modulators.new;
 		modulators.draw("_modulators", guiDefinitions.modulatorsViewDimensions, synthesis, n: numInstances);
 		modulators.tables = [multiparameterModulationTable, modulationRatioTable, modulationTable];
-		// Connect modulators to synthSwitcher for overlap morph visibility toggle
-		synthSwitcher.modulatorsGUI = modulators;
-		// Start with overlap morph hidden (default is standard/classic synth)
-		modulators.setOverlapMorphVisible(false);
 
 		groupsOffset = NuPG_GUI_GroupsOffset.new;
 		groupsOffset.draw("_groupsOffset", guiDefinitions.groupsOffsetViewDimensions, n: numInstances);
@@ -772,25 +768,6 @@ NuPG_Application {
 			modulator4.modType[i].action_({|m| synthesis.trainInstances[i].set(\modulator_type_four, m.value) });
 
 			4.collect{|k| 13.collect{|l| data.data_matrix[i][k][l].connect(matrixMod.matrix[i][k][l]) } };
-
-			// Overlap morph CV connections (rate, depth, min, max only)
-			// Rate [0]: slider + numberbox
-			data.data_overlapMorph[i][0].connect(modulators.overlapMorphRate[i]);
-			data.data_overlapMorph[i][0].connect(modulators.overlapMorphRateNum[i]);
-			// Depth [1]: slider + numberbox
-			data.data_overlapMorph[i][1].connect(modulators.overlapMorphDepth[i]);
-			data.data_overlapMorph[i][1].connect(modulators.overlapMorphDepthNum[i]);
-			// Min [3]: numberbox
-			data.data_overlapMorph[i][3].connect(modulators.overlapMorphMin[i]);
-			// Max [4]: numberbox
-			data.data_overlapMorph[i][4].connect(modulators.overlapMorphMax[i]);
-			// Spread [5]: slider + numberbox
-			data.data_overlapMorph[i][5].connect(modulators.overlapMorphSpread[i]);
-			data.data_overlapMorph[i][5].connect(modulators.overlapMorphSpreadNum[i]);
-			// Shape [2]: menu action to update CV
-			modulators.overlapMorphShape[i].action_({|m|
-				data.data_overlapMorph[i][2].value = m.value;
-			});
 		};
 	}
 
@@ -881,11 +858,6 @@ NuPG_Application {
 			this.prAddMIDILearn(modulator4.modFreq[i], data.data_modulator4[i][1], "inst" ++ i ++ "_mod4_freq");
 			this.prAddMIDILearn(modulator4.modDepth[i], data.data_modulator4[i][2], "inst" ++ i ++ "_mod4_depth");
 
-			// Overlap morph sliders
-			this.prAddMIDILearn(modulators.overlapMorphRate[i], data.data_overlapMorph[i][0], "inst" ++ i ++ "_overlap_rate");
-			this.prAddMIDILearn(modulators.overlapMorphDepth[i], data.data_overlapMorph[i][1], "inst" ++ i ++ "_overlap_depth");
-			this.prAddMIDILearn(modulators.overlapMorphSpread[i], data.data_overlapMorph[i][5], "inst" ++ i ++ "_overlap_spread");
-
 			// Masking probability
 			this.prAddMIDILearn(masking.probability[i], data.data_probabilityMaskSingular[i], "inst" ++ i ++ "_probability");
 
@@ -896,8 +868,6 @@ NuPG_Application {
 			midiMapper.registerCV("inst" ++ i ++ "_center_mask", data.data_channelMask[i][1]);
 			midiMapper.registerCV("inst" ++ i ++ "_sieve_mod", data.data_sieveMask[i][0]);
 			midiMapper.registerCV("inst" ++ i ++ "_sieve_seq", data.data_sieveMask[i][1]);
-			midiMapper.registerCV("inst" ++ i ++ "_overlap_min", data.data_overlapMorph[i][3]);
-			midiMapper.registerCV("inst" ++ i ++ "_overlap_max", data.data_overlapMorph[i][4]);
 		};
 	}
 
@@ -1093,14 +1063,7 @@ NuPG_Application {
 				ampThreeMod_one_active: data.data_matrix[i][0][12],
 				ampThreeMod_two_active: data.data_matrix[i][1][12],
 				ampThreeMod_three_active: data.data_matrix[i][2][12],
-				ampThreeMod_four_active: data.data_matrix[i][3][12],
-				// Overlap morph (formantModel + fmIndex removed to make room)
-				overlapMorphRate: data.data_overlapMorph[i][0],
-				overlapMorphDepth: data.data_overlapMorph[i][1],
-				overlapMorphShape: data.data_overlapMorph[i][2],
-				overlapMorphMin: data.data_overlapMorph[i][3],
-				overlapMorphMax: data.data_overlapMorph[i][4],
-				overlapPhaseOffset: data.data_overlapMorph[i][5]
+				ampThreeMod_four_active: data.data_matrix[i][3][12]
 			]);
 		};
 	}

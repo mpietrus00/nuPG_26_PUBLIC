@@ -39,7 +39,7 @@ NuPG_Data {
 	var <>data_modulator1, <>data_modulator2, <>data_modulator3, <>data_modulator4;
 	var <>data_matrix;
 	var <>data_spatial;
-	var <>data_overlapMorph;  // Overlap morphing modulation [rate, depth, shape, min, max, spread]
+
 
 	// Conductor compatibility layer
 	var <>conductor;  // Dictionary that mimics Conductor access pattern
@@ -137,8 +137,6 @@ NuPG_Data {
 		data_modulator4 = Array.newClear(n);
 		data_matrix = Array.newClear(n);
 		data_spatial = Array.newClear(n);
-		data_overlapMorph = Array.newClear(n);
-
 		// Create ControlValueEnvir for this data instance
 		cvEnvir = ControlValueEnvir.new;
 	}
@@ -209,18 +207,8 @@ NuPG_Data {
 		// Modulators [fmAmount, fmRatio, multiParam]
 		data_modulators[index] = [
 			NuPG_Data.makeCV(0, 0.0, 16.0, 0.001, \lin),
-			NuPG_Data.makeCV(0, 0.0, 16.0, 0.001, \lin),
+			NuPG_Data.makeCV(0, 1.0, 16.0, 0.001, \lin),
 			NuPG_Data.makeCV(0, 0.0, 2.0, 0.001, \lin)
-		];
-
-		// Overlap morph [rate, depth, shape, min, max, spread]
-		data_overlapMorph[index] = [
-			NuPG_Data.makeCV(0.1, 0.01, 10.0, 0.01, \exp),  // rate (Hz)
-			NuPG_Data.makeCV(0, 0.0, 1.0, 0.01, \lin),       // depth (0-1)
-			NuPG_Data.makeCV(0, 0, 4, 1, \lin),              // shape (0=sine, 1=tri, 2=saw, 3=random, 4=chaos)
-			NuPG_Data.makeCV(1, 0.1, 100.0, 0.1, \lin),      // min overlap
-			NuPG_Data.makeCV(10, 0.1, 100.0, 0.1, \lin),     // max overlap
-			NuPG_Data.makeCV(0, 0.0, 1.0, 0.01, \lin)        // spread between trains
 		];
 
 		// Table CVs
@@ -814,4 +802,3 @@ NuPG_Data {
 		);
 	}
 }
-
