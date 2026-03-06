@@ -212,7 +212,7 @@ NuPG_Synthesis {
 					var group_onOff;
 
 					var offsetMod, offset;
-					var overlapMod overlap, overlap_loop;
+					var overlapMod, overlap, overlap_loop;
 					var formantMod, formantFreq, formantFreq_loop;
 					var ampMod, amp, amp_loop;
 					var panMod, pan, pan_loop;

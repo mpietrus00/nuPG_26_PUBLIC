@@ -126,7 +126,7 @@ NuPG_Synthesis_OscOS {
 					var group_onOff;
 
 					var offsetMod, offset, trigger;
-					var overlapMod overlap, overlap_loop;
+					var overlapMod, overlap, overlap_loop;
 					var formantMod, formantFreq, formantFreq_loop;
 					var ampMod, amp, amp_loop;
 					var panMod, pan, pan_loop;
@@ -278,7 +278,7 @@ NuPG_Synthesis_OscOS {
 					fmods = highpass.(fmods, modFreq);
 
 					// Apply frequency modulation
-					formantFreq = formantFreq + (formantFreq * fmod * fmAmt);
+					formantFreq = formantFreq + (formantFreq * fmods * fmAmt);
 
 					// ============================================================
 					// GENERATE GRAINS
