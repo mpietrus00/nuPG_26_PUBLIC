@@ -53,7 +53,7 @@ NuPG_GUI_Definitions {
 				synthSwitcher: (width: 250, height: 45),
 				extensions: (width: 300, height: 110),
 				main: (width: 300, height: 430),
-				modulator: (width: 320, height: 340),
+				modulator: (width: 320, height: 160),
 				offset: (width: 320, height: 150),
 				scrubber: (width: 1000, height: 30),
 				record: (width: 300, height: 30),
