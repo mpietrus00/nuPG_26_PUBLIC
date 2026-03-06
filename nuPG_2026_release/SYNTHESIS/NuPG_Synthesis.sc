@@ -99,7 +99,7 @@ NuPG_Synthesis {
 
 		trainInstances = numInstances.collect{ |i|
 
-			Ndef((\nuPG_train_ ++ i).asSymbol, { |pulsaret_buffer, envelope_buffer|
+			Ndef((\nuPG_train_ ++ i).asSymbol, { |pulsaret_buffer, envelope_buffer, frequency_buffer|
 
 				// Helper functions for masking
 				var probMask = { |trig, prob = 1|
@@ -218,7 +218,7 @@ NuPG_Synthesis {
 					var panMod, pan, pan_loop;
 
 					var formantFreq, grainDur, grains;
-					var fmRatio, fmAmt, fmod;
+					var fmRatio, fmAmt, modFreq, modPhase, fmod;
 					var compensationGain;
 
 					// Get group on/off state
@@ -313,18 +313,29 @@ NuPG_Synthesis {
 					// ============================================================
 
 					// Calculate params for FM
-					fmAmt = \fmAmt.kr(0) * \fmAmt_loop.kr(1);
-					fmRatio = \fmRatio.kr(0) * \fmRatio_loop.kr(1);
+					fmAmt = \fmAmt.kr(0) * Latch.ar(\fmAmt_loop.ar(1), trigger);
+					fmRatio = \fmRatio.kr(0) * Latch.ar(\fmRatio_loop.ar(1), trigger);
 
-					// TO DO: refactor of modulators
-					// Generate FM modulators
-					fmod = Select.kr(\modulationMode.kr(0), [
-						Latch.ar(LFSaw.ar(formantFreq * fmRatio, 0, fmAmt, fmAmt), trigger),
-						Latch.ar(LFSaw.ar(formantFreq - fmAmt * fmRatio, 0, fmAmt, fmAmt) - fmAmt, trigger)
-					]);
+					// Calculate mod frequency for FM
+					modFreq = formantFreq * fmRatio;
+
+					// Calculate mod phase for FM
+					modPhase = Phasor.ar(DC.ar(0), modFreq * SampleDur.ir);
+
+					// Generate FM modulator
+					fmod = SingleOscOS.ar(
+						bufnum: frequency_buffer,
+						phase: modPhase,
+						numCycles: 1,
+						cyclePos: 0,
+						oversample: 0
+					);
+
+					// Apply sample and hold for FM
+					fmod = Latch.ar(fmod, trigger);
 
 					// Apply frequency modulation
-					formantFreq = formantFreq + (formantFreq * fmod);
+					formantFreq = formantFreq + (formantFreq * fmod * fmAmt);
 
 					// ============================================================
 					// GENERATE GRAINS

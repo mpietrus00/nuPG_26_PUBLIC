@@ -237,7 +237,7 @@ NuPG_Synthesis_OscOS {
 					fmRatio = \fmRatio.kr(0) * Latch.ar(\fmRatio_loop.ar(1), voices[\triggers]);
 
 					// Calculate mod frequency for FM
-					modFreq = windowRate * fmRatio; // TO DO: add Select for windowRate / formantFreq
+					modFreq = windowRate * fmRatio;
 
 					// Calculate mod phases for FM
 					modPhases = RampIntegrator.ar(
@@ -263,7 +263,9 @@ NuPG_Synthesis_OscOS {
 
 					// Apply tracking OnePole filter
 					fmods = highpass.(fmods, modFreq);
-					fmods = fmods * fmAmt;
+
+					// Apply frequency modulation
+					formantFreq = formantFreq + (formantFreq * fmod * fmAmt);
 
 					// ============================================================
 					// GENERATE GRAINS
@@ -271,7 +273,7 @@ NuPG_Synthesis_OscOS {
 
 					grainPhases = RampIntegrator.ar(
 						trig: voices[\triggers],
-						rate: formantFreq + (formantFreq * fmods),
+						rate: formantFreq,
 						subSampleOffset: events[\subSampleOffset]
 					);
 
