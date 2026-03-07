@@ -132,7 +132,7 @@ NuPG_Synthesis_OscOS {
 					var panMod, pan, pan_loop;
 
 					var windowRate, voices;
-					var fmRatios, fmIndices, modFreqs, modPhases, fmods;
+					var fmMode, fmRatios, fmIndices, modFreqs, modPhases, fmods;
 					var grainPhases, grainOscs, grainWindows, channelMask, grains;
 					var compensationGain;
 
@@ -254,9 +254,10 @@ NuPG_Synthesis_OscOS {
 					// Calculate params for FM
 					fmIndices = \fmAmt.kr(0) * Latch.ar(\fmAmt_loop.ar(1), voices[\triggers]);
 					fmRatios = \fmRatio.kr(0) * Latch.ar(\fmRatio_loop.ar(1), voices[\triggers]);
+					fmMode = \modulationMode.kr(0);
 
 					// Calculate mod frequencies for FM
-					modFreqs = Select.ar(\modulationMode.kr(0), [
+					modFreqs = Select.ar(fmMode, [
 						windowRate * fmRatios,
 						formantFreq * fmRatios
 					]);
@@ -281,13 +282,19 @@ NuPG_Synthesis_OscOS {
 					fmods = highpass.(fmods, modFreqs);
 					fmods = fmods * fmIndices;
 
+					// Apply frequency modulation
+					formantFreq = Select.ar(fmMode, [
+						formantFreq + (formantFreq * fmods * fmIndices),
+						formantFreq + (modFreqs * fmods * fmIndices)
+					]);
+
 					// ============================================================
 					// GENERATE GRAINS
 					// ============================================================
 
 					grainPhases = RampIntegrator.ar(
 						trig: voices[\triggers],
-						rate: formantFreq + (formantFreq * fmods),
+						rate: formantFreq,
 						subSampleOffset: events[\subSampleOffset]
 					);
 
