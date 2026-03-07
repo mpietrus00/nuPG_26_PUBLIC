@@ -99,7 +99,7 @@ NuPG_Synthesis {
 
 		trainInstances = numInstances.collect{ |i|
 
-			Ndef((\nuPG_train_ ++ i).asSymbol, { |pulsaret_buffer, envelope_buffer, frequency_buffer|
+			Ndef((\nuPG_train_ ++ i).asSymbol, { |pulsaret_buffer, envelope_buffer|
 
 				// Helper functions for masking
 				var probMask = { |trig, prob = 1|
