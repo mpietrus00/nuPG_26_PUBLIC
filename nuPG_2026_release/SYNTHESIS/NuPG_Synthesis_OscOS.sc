@@ -132,7 +132,7 @@ NuPG_Synthesis_OscOS {
 					var panMod, pan, pan_loop;
 
 					var windowRate, voices;
-					var fmRatio, fmAmt, modFreq, modPhases, fmods;
+					var fmRatios, fmIndices, modFreqs, modPhases, fmods;
 					var grainPhases, grainOscs, grainWindows, channelMask, grains;
 					var compensationGain;
 
@@ -252,16 +252,19 @@ NuPG_Synthesis_OscOS {
 					// ============================================================
 
 					// Calculate params for FM
-					fmAmt = \fmAmt.kr(0) * Latch.ar(\fmAmt_loop.ar(1), voices[\triggers]);
-					fmRatio = \fmRatio.kr(0) * Latch.ar(\fmRatio_loop.ar(1), voices[\triggers]);
+					fmIndices = \fmAmt.kr(0) * Latch.ar(\fmAmt_loop.ar(1), voices[\triggers]);
+					fmRatios = \fmRatio.kr(0) * Latch.ar(\fmRatio_loop.ar(1), voices[\triggers]);
 
-					// Calculate mod frequency for FM
-					modFreq = windowRate * fmRatio;
+					// Calculate mod frequencies for FM
+					modFreqs = Select.ar(\modulationMode.kr(0), [
+						windowRate * fmRatios,
+						formantFreq * fmRatios
+					]);
 
 					// Calculate mod phases for FM
 					modPhases = RampIntegrator.ar(
 						trig: voices[\triggers],
-						rate: modFreq,
+						rate: modFreqs,
 						subSampleOffset: events[\subSampleOffset]
 					);
 
@@ -274,17 +277,9 @@ NuPG_Synthesis_OscOS {
 						oversample: 0
 					);
 
-					// Enable sample and hold for FM
-					fmods = Select.ar(\modulationMode.kr(0), [
-						fmods,
-						Latch.ar(fmods, voices[\triggers])
-					]);
-
 					// Apply tracking OnePole filter
-					fmods = highpass.(fmods, modFreq);
-
-					// Apply frequency modulation
-					formantFreq = formantFreq + (formantFreq * fmods * fmAmt);
+					fmods = highpass.(fmods, modFreqs);
+					fmods = fmods * fmIndices;
 
 					// ============================================================
 					// GENERATE GRAINS
@@ -292,7 +287,7 @@ NuPG_Synthesis_OscOS {
 
 					grainPhases = RampIntegrator.ar(
 						trig: voices[\triggers],
-						rate: formantFreq,
+						rate: formantFreq + (formantFreq * fmods),
 						subSampleOffset: events[\subSampleOffset]
 					);
 
@@ -330,7 +325,7 @@ NuPG_Synthesis_OscOS {
 					grains = grains.sum;
 
 					compensationGain = 1.0 / sqrt(max(1.0, overlap));
-					grains = grains * compensationGain;
+					grains = grains * compensationGain * 0.9;
 
 					grains * amp;
 				};
