@@ -280,7 +280,6 @@ NuPG_Synthesis_OscOS {
 
 					// Apply tracking OnePole filter
 					fmods = highpass.(fmods, modFreqs);
-					fmods = fmods * fmIndices;
 
 					// Apply frequency modulation
 					formantFreq = Select.ar(fmMode, [
