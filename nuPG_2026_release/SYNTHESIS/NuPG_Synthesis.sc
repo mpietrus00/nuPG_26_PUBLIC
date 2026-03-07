@@ -212,14 +212,10 @@ NuPG_Synthesis {
 					var group_onOff;
 
 					var offsetMod, offset;
-					var overlapMod, overlap, overlap_loop;
 					var formantMod, formantFreq, formantFreq_loop;
 					var ampMod, amp, amp_loop;
 					var panMod, pan, pan_loop;
-
-					var fmRatio, fmAmt, modFreq, modPhase, fmod;
-					var grainDur, grains;
-					var compensationGain;
+					var grains;
 
 					// Get group on/off state
 					group_onOff = NamedControl.kr(("group_" ++ chainNum ++ "_onOff").asSymbol, 0);
@@ -260,24 +256,6 @@ NuPG_Synthesis {
 					formantFreq = (formantFreq + (formantFreq * formantMod)).clip(1, 20000); // TO DO: replace with 2 ** (mod * index)
 
 					// ============================================================
-					// OVERLAP CALCULATION
-					// ============================================================
-
-					// Parameter names: envMulOneMod_one_active, envMulOneMod_two_active, etc.
-					overlapMod = modNames.collect{ |name, j|
-						Select.ar(NamedControl.kr(("envMul" ++ chainID ++ "Mod_" ++ name ++ "_active").asSymbol, 0), [
-							K2A.ar(0), modIndices[j] * mods[j] * 0.1 // TODO: figure out specs and scaling
-						])
-					}.sum;
-
-					// Parameter names: envMul_One_loop, envMul_One
-					overlap_loop = NamedControl.kr(("envMul_" ++ chainID ++ "_loop").asSymbol, 1);
-					overlap_loop = Select.kr(group_onOff, [1, overlap_loop]);
-
-					overlap = NamedControl.kr(("envMul_" ++ chainID).asSymbol, 1) * overlap_loop;
-					overlap = (overlap + overlapMod).clip(0.1, 4.99);
-
-					// ============================================================
 					// AMPLITUDE CALCULATION
 					// ============================================================
 
@@ -314,53 +292,22 @@ NuPG_Synthesis {
 					pan = (pan + panMod).fold(-1, 1);
 
 					// ============================================================
-					// FREQUENCY MODULATION
-					// ============================================================
-
-					// Calculate params for FM
-					fmAmt = \fmAmt.kr(0) * \fmAmt_loop.kr(1);
-					fmRatio = \fmRatio.kr(0) * \fmRatio_loop.kr(1);
-
-					// Calculate mod frequency for FM
-					modFreq = formantFreq * fmRatio;
-
-					// Calculate mod phase for FM
-					modPhase = Phasor.ar(DC.ar(0), modFreq * SampleDur.ir);
-
-					// Generate FM modulator
-					fmod = SingleOscOS.ar(
-						bufnum: frequency_buffer,
-						phase: modPhase,
-						numCycles: 1,
-						cyclePos: 0,
-						oversample: 0
-					);
-
-					// Apply frequency modulation
-					formantFreq = formantFreq + (formantFreq * fmod * fmAmt);
-
-					// ============================================================
 					// GENERATE GRAINS
 					// ============================================================
-
-					grainDur = overlap / max(0.001, triggerFreq);
-					//grainDur = overlap / max(0.001, formantFreq);
 
 					grains = GrainBuf.ar(
 						numChannels: 2,
 						trigger: trigger,
-						dur: grainDur,
+						dur: 1 / formantFreq,
 						sndbuf: pulsaret_buffer,
 						rate: formantFreq * BufFrames.kr(pulsaret_buffer) * SampleDur.ir,
 						pos: 0,
 						interp: 4,
 						pan: pan + channelMask,
 						envbufnum: envelope_buffer,
-						maxGrains: 2048
+						maxGrains: 2048,
+						mul: 0.9
 					);
-
-					compensationGain = 1.0 / sqrt(max(1.0, overlap));
-					grains = grains * compensationGain;
 
 					grains * amp;
 				};
