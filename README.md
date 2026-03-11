@@ -1,6 +1,6 @@
 # nuPG 26 - Pulsar Synthesis for SuperCollider
 
-nuPG is a pulsar synthesis instrument for SuperCollider featuring multiple grain trains, modulation matrices, real-time GUI control, and dual synthesis engines.
+nuPG is a pulsar synthesis instrument for SuperCollider featuring multiple grain trains, modulation matrices, real-time GUI control, and dual synthesis engines. Developed by Marcin Pietruszewski in collaboration with Jan-Lars Kleine-Tebbe
 
 ## Requirements
 
