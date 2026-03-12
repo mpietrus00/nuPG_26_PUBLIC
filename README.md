@@ -11,12 +11,8 @@ nuPG is a pulsar synthesis instrument for SuperCollider featuring multiple grain
 | **SuperCollider** | 3.11+ | Core platform |
 | **sc3-plugins** | Latest | Chaos/noise UGens for modulators |
 | **Connection Quark** | Latest | Control value (CV) system |
-
-### Optional Requirements
-
-| Dependency | Purpose |
-|------------|---------|
-| **GrainUtils** | Non-aliasing OscOS synthesis mode |
+|**miSCellaneous_lib Quark** | Latest | Sieves Masking |
+|**GrainUtils** | Non-aliasing OscOS synthesis mode |
 
 ## Installation
 
