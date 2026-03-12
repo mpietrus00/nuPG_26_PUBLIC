@@ -61,9 +61,9 @@ Platform.userExtensionDir;  // Run this to find your Extensions path
 
 Then recompile the class library.
 
-### Step 4: Install Optional Dependencies
+### Step 4: Install Dependencies
 
-**GrainUtils** (for non-aliasing OscOS synthesis)
+**GrainUtils** (PulsarOS plugin for non-aliasing OscOS synthesis)
 
 Download from [dietcv/GrainUtils releases](https://github.com/dietcv/GrainUtils/releases/tag/v1.3.10):
 - Download the appropriate version for your platform (e.g., `GrainUtils-macos-15-arm.zip` for Apple Silicon)
