@@ -12,7 +12,7 @@ nuPG is a pulsar synthesis instrument for SuperCollider featuring multiple grain
 | **sc3-plugins** | Latest | Chaos/noise UGens for modulators |
 | **Connection Quark** | Latest | Control value (CV) system |
 |**miSCellaneous_lib Quark** | Latest | Sieves Masking |
-|**GrainUtils** | Non-aliasing OscOS synthesis mode |
+|**GrainUtils** | Latest |PulsarOS implementation for Non-aliasing OscOS synthesis mode |
 
 ## Installation
 
@@ -34,6 +34,7 @@ Open SuperCollider and run:
 
 ```supercollider
 Quarks.install("Connection");
+Quarks.install("miSCellaneous_lib");
 ```
 
 ### Step 3: Install nuPG
