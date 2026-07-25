@@ -233,7 +233,7 @@ See `nuPG_API.scd` for comprehensive programmatic control documentation, includi
 
 ## License
 
-See LICENSE file for details.
+nuPG (this repository) is released under the MIT License (see LICENSE).
 
 ## Acknowledgments
 
