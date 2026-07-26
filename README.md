@@ -1,5 +1,7 @@
 # nuPG 26 - Pulsar Synthesis for SuperCollider
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21596918.svg)](https://doi.org/10.5281/zenodo.21596918)
+
 nuPG is a pulsar synthesis instrument for SuperCollider featuring multiple grain trains, modulation matrices, real-time GUI control, and dual synthesis engines. Developed by Marcin Pietruszewski in collaboration with Jan-Lars Kleine-Tebbe
 
 ## Requirements
@@ -233,9 +235,15 @@ See `nuPG_API.scd` for comprehensive programmatic control documentation, includi
 
 ## Citation
 
-If you use nuPG in research or published work, please cite it. Machine-readable
-metadata is in [CITATION.cff](CITATION.cff); GitHub renders a formatted citation
-from it under "Cite this repository" in the sidebar.
+If you use nuPG in research or published work, please cite it.
+
+Pietruszewski, M. (2026). *nuPG 26: Pulsar Synthesis for SuperCollider* (version
+26_1.0.1) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21596918
+
+The DOI above is the concept DOI and always resolves to the latest version. To
+cite this specific release, use https://doi.org/10.5281/zenodo.21596919.
+Machine-readable metadata is in [CITATION.cff](CITATION.cff); GitHub renders a
+formatted citation from it under "Cite this repository" in the sidebar.
 
 ## License
 

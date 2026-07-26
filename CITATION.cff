@@ -14,6 +14,16 @@ authors:
     email: studio@marcinpietruszewski.com
 repository-code: "https://github.com/mpietrus00/nuPG_26_PUBLIC"
 url: "https://www.marcinpietruszewski.com"
+version: 26_1.0.1
+date-released: "2026-07-26"
+doi: 10.5281/zenodo.21596918
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.21596918
+    description: Concept DOI, always resolves to the latest version
+  - type: doi
+    value: 10.5281/zenodo.21596919
+    description: DOI for version 26_1.0.1
 license: MIT
 keywords:
   - pulsar synthesis
