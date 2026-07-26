@@ -231,6 +231,12 @@ See `nuPG_API.scd` for comprehensive programmatic control documentation, includi
 - Check mappings: `~app.midiMapper.printMappings;`
 - Re-enable if disabled: `~app.midiMapper.enable;`
 
+## Citation
+
+If you use nuPG in research or published work, please cite it. Machine-readable
+metadata is in [CITATION.cff](CITATION.cff); GitHub renders a formatted citation
+from it under "Cite this repository" in the sidebar.
+
 ## License
 
 nuPG (this repository) is released under the MIT License (see LICENSE).
