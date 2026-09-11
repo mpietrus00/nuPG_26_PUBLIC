@@ -1,0 +1,21 @@
+{
+  "upload_type": "software",
+  "title": "nuPG 26: Pulsar Synthesis for SuperCollider",
+  "description": "<p>nuPG is a pulsar synthesis program for SuperCollider. It provides multiple independent pulsaret trains, a modulation matrix, real-time GUI control, and two synthesis engines. The program continues the New Pulsar Generator lineage begun in Curtis Roads and Alberto de Campo's original PulsarGenerator (2001).</p>",
+  "creators": [
+    {
+      "name": "Pietruszewski, Marcin",
+      "orcid": "0009-0007-4174-8209"
+    }
+  ],
+  "license": "mit",
+  "access_right": "open",
+  "keywords": [
+    "pulsar synthesis",
+    "granular synthesis",
+    "microsound",
+    "SuperCollider",
+    "computer music",
+    "sound synthesis"
+  ]
+}

@@ -1,5 +1,7 @@
 # nuPG 26 - Pulsar Synthesis for SuperCollider
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21596918.svg)](https://doi.org/10.5281/zenodo.21596918)
+
 nuPG is a pulsar synthesis instrument for SuperCollider featuring multiple grain trains, modulation matrices, real-time GUI control, and dual synthesis engines. Developed by Marcin Pietruszewski in collaboration with Jan-Lars Kleine-Tebbe
 
 ## Requirements
@@ -8,15 +10,11 @@ nuPG is a pulsar synthesis instrument for SuperCollider featuring multiple grain
 
 | Dependency | Version | Purpose |
 |------------|---------|---------|
-| **SuperCollider** | 3.11+ | Core platform |
+| **SuperCollider** | 3.14 | Core platform |
 | **sc3-plugins** | Latest | Chaos/noise UGens for modulators |
 | **Connection Quark** | Latest | Control value (CV) system |
-
-### Optional Requirements
-
-| Dependency | Purpose |
-|------------|---------|
-| **GrainUtils** | Non-aliasing OscOS synthesis mode |
+|**miSCellaneous_lib Quark** | Latest | Sieves Masking |
+|**GrainUtils** | Latest |PulsarOS implementation for Non-aliasing OscOS synthesis mode |
 
 ## Installation
 
@@ -38,6 +36,7 @@ Open SuperCollider and run:
 
 ```supercollider
 Quarks.install("Connection");
+Quarks.install("miSCellaneous_lib");
 ```
 
 ### Step 3: Install nuPG
@@ -64,9 +63,9 @@ Platform.userExtensionDir;  // Run this to find your Extensions path
 
 Then recompile the class library.
 
-### Step 4: Install Optional Dependencies
+### Step 4: Install Dependencies
 
-**GrainUtils** (for non-aliasing OscOS synthesis)
+**GrainUtils** (PulsarOS plugin for non-aliasing OscOS synthesis)
 
 Download from [dietcv/GrainUtils releases](https://github.com/dietcv/GrainUtils/releases/tag/v1.3.10):
 - Download the appropriate version for your platform (e.g., `GrainUtils-macos-15-arm.zip` for Apple Silicon)
@@ -234,9 +233,21 @@ See `nuPG_API.scd` for comprehensive programmatic control documentation, includi
 - Check mappings: `~app.midiMapper.printMappings;`
 - Re-enable if disabled: `~app.midiMapper.enable;`
 
+## Citation
+
+If you use nuPG in research or published work, please cite it.
+
+Pietruszewski, M. (2026). *nuPG 26: Pulsar Synthesis for SuperCollider* (version
+26_1.0.1) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21596918
+
+The DOI above is the concept DOI and always resolves to the latest version. To
+cite this specific release, use https://doi.org/10.5281/zenodo.21596919.
+Machine-readable metadata is in [CITATION.cff](CITATION.cff); GitHub renders a
+formatted citation from it under "Cite this repository" in the sidebar.
+
 ## License
 
-See LICENSE file for details.
+nuPG (this repository) is released under the MIT License (see LICENSE).
 
 ## Acknowledgments
 

@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor / tooling
+.claude/
+.idea/
+.vscode/
+*.swp
+*~
+
+# SuperCollider
+*.scsyndef
