@@ -37,8 +37,6 @@ NuPG_ModulatorSet {
 
 				LFNoise2.ar(modulation_frequency),
 
-				LFNoise2.ar(modulation_frequency),
-
 				// 9-10: Sparse random
 				Dust.ar(modulation_frequency) * 2 - 1,
 

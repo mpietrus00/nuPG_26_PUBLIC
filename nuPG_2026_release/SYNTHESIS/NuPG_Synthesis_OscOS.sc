@@ -27,10 +27,14 @@ NuPG_Synthesis_OscOS {
 					trig * Select.ar(maskOn, [DC.ar(1), mask]);
 				};
 
-				var chanMask = { |trig, reset, channelMask, centerMask|
-					var demand = Dseq([Dser([-1], channelMask),
-						Dser([1], channelMask), Dser([0], centerMask)], inf);
-					Demand.ar(trig + reset, reset, demand);
+				var chanMask = { |trig, reset, channelMask, centerMask, numChannels = 2|
+					var arrayOfPositions = (0..numChannels - 1) / (numChannels - 1);
+					var channelPos = arrayOfPositions.collect { |pos|
+						Dser([pos], channelMask)
+					};
+					var demand = Dseq(channelPos ++ Dser([0.5], centerMask), inf);
+					Demand.ar(trig + reset, reset, demand)
+					.linlin(0, 1, -1 / numChannels, (2 * numChannels - 3) / numChannels);
 				};
 
 				var modIndices, mods, normalizedModSum;
@@ -106,7 +110,8 @@ NuPG_Synthesis_OscOS {
 					events[\trigger],
 					DC.ar(0),
 					\chanMask.kr(0),
-					\centerMask.kr(1)
+					\centerMask.kr(1),
+					numChannels
 				);
 
 				// ============================================================
@@ -196,6 +201,8 @@ NuPG_Synthesis_OscOS {
 					pan = NamedControl.kr(("pan_" ++ chainNum).asSymbol, 0);
 					pan = (pan + pan_loop + panMod).fold(-1, 1);
 
+					pan = pan.linlin(-1, 1, -1 / numChannels, (2 * numChannels - 3) / numChannels);
+
 					// ============================================================
 					// GENERATE PULSARS
 					// ============================================================
@@ -207,16 +214,14 @@ NuPG_Synthesis_OscOS {
 					fmFreq = windowRate * fmRatio;
 
 					sig = PulsarOS.ar(
-						numChannels: 2,
+
 						trig: trigger,
 						triggerFreq: windowRate,
 						subSampleOffset: events[\subSampleOffset],
 
-						grainFreq: formantFreq,
+						oscFreq: formantFreq,
 						modFreq: fmFreq,
 						modIndex: fmIndex,
-						pan: pan + channelMask,
-						amp: amp,
 
 						oscBuffer: pulsaret_buffer,
 						oscNumCycles: 1,
@@ -233,7 +238,14 @@ NuPG_Synthesis_OscOS {
 						oversample: 1,
 					);
 
+					sig = PanAz.ar(
+						numChans: numChannels,
+						in: sig,
+						pos: pan + channelMask
+					);
+
 					sig * amp;
+
 				};
 
 				// calculate pulsars for all three chains
